@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="587.0" prefWidth="416.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.signupPageController">
+   <children>
+      <ImageView fitHeight="115.0" fitWidth="131.0" pickOnBounds="true" preserveRatio="true">
+         <VBox.margin>
+            <Insets top="20.0" />
+         </VBox.margin>
+         <image>
+            <Image url="@../img/signup.png" />
+         </image>
+      </ImageView>
+      <Label prefHeight="54.0" prefWidth="146.0" text="Sign Up">
+         <font>
+            <Font name="System Bold" size="36.0" />
+         </font>
+      </Label>
+      <VBox layoutX="10.0" layoutY="199.0" prefHeight="93.0" prefWidth="416.0">
+         <children>
+            <Label text="Full Name">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <VBox.margin>
+                  <Insets left="20.0" />
+               </VBox.margin>
+            </Label>
+            <TextField fx:id="nameField" focusTraversable="false" prefHeight="40.0" prefWidth="333.0" promptText="Full Name">
+               <VBox.margin>
+                  <Insets left="20.0" right="20.0" />
+               </VBox.margin>
+            </TextField>
+         </children>
+      </VBox>
+      <VBox prefHeight="93.0" prefWidth="416.0">
+         <children>
+            <Label fx:id="emailField" text="Email">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <VBox.margin>
+                  <Insets left="20.0" />
+               </VBox.margin>
+            </Label>
+            <TextField fx:id="emailField2" focusTraversable="false" prefHeight="40.0" prefWidth="333.0" promptText="name@example.com">
+               <VBox.margin>
+                  <Insets left="20.0" right="20.0" />
+               </VBox.margin>
+            </TextField>
+         </children>
+      </VBox>
+      <VBox layoutX="10.0" layoutY="215.0" prefHeight="93.0" prefWidth="416.0">
+         <children>
+            <Label fx:id="passField2" text="Password">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <VBox.margin>
+                  <Insets left="20.0" />
+               </VBox.margin>
+            </Label>
+            <TextField fx:id="passFeild" focusTraversable="false" prefHeight="40.0" prefWidth="333.0" promptText="********">
+               <VBox.margin>
+                  <Insets left="20.0" right="20.0" />
+               </VBox.margin>
+            </TextField>
+         </children>
+      </VBox>
+      <Button fx:id="signupButton" focusTraversable="false" mnemonicParsing="false" onAction="#handleSignup" prefHeight="44.0" prefWidth="370.0" style="-fx-background-color: #000000; -fx-background-radius: 10;" text="Sign Up" textFill="#fcf5f5">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Button>
+      <HBox alignment="CENTER" prefHeight="66.0" prefWidth="416.0">
+         <VBox.margin>
+            <Insets top="20.0" />
+         </VBox.margin>
+         <children>
+            <Label text="Already have an account?">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Hyperlink fx:id="logLink" onAction="#handleLogin" text="Log in" textFill="#403c3c">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Hyperlink>
+         </children>
+      </HBox>
+   </children>
+</VBox>
