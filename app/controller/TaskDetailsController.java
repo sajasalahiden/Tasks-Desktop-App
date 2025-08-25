@@ -2,8 +2,10 @@ package app.controller;
 
 import app.model.Priority;
 import app.model.Task;
-import app.model.TaskStorage;
 import app.model.User;
+
+import app.config.ServiceLocator;
+import app.repo.TaskRepository;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -48,6 +50,9 @@ public class TaskDetailsController {
     private Task currentTask;
     private boolean editing = false;
 
+    // مستودع المهام (بديل TaskStorage)
+    private final TaskRepository tasksRepo = ServiceLocator.tasks();
+
     public void setContext(User user, Task task) {
         this.currentUser = user;
         this.currentTask = task;
@@ -55,7 +60,11 @@ public class TaskDetailsController {
 
         if (currentTask != null) {
             completeMark.setSelected(currentTask.isCompleted());
-            completeMark.selectedProperty().addListener((obs, o, v) -> currentTask.setCompleted(v));
+            // عند تغيير الحالة احفظ فورًا في DB
+            completeMark.selectedProperty().addListener((obs, o, v) -> {
+                currentTask.setCompleted(v);
+                persistUpdateSilently();
+            });
         }
     }
 
@@ -68,14 +77,29 @@ public class TaskDetailsController {
 
     @FXML
     private void onDelete(ActionEvent e) {
-        if (currentUser != null && currentTask != null) TaskStorage.deleteTask(currentUser, currentTask);
-        goToMyTasks();
+        if (currentUser == null || currentUser.getId() == null || currentTask == null || currentTask.getId() == null) {
+            alert("Delete Task", "Missing user or task id.");
+            return;
+        }
+        try {
+            tasksRepo.delete(currentTask.getId(), currentUser.getId());
+            goToMyTasks();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            alert("Delete Task", "Failed to delete: " + ex.getMessage());
+        }
     }
 
     @FXML
     private void onEditOrSave(ActionEvent e) {
-        if (!editing) enterEditMode();
-        else if (applyEditsToTask()) { exitEditMode(); fillLabelsFromTask(currentTask); }
+        if (!editing) {
+            enterEditMode();
+        } else if (applyEditsToTask()) {
+            // احفظ في DB ثم ارجعي لوضع العرض
+            if (!persistUpdate()) return;
+            exitEditMode();
+            fillLabelsFromTask(currentTask);
+        }
     }
 
     // ====== عرض/تحرير ======
@@ -99,7 +123,6 @@ public class TaskDetailsController {
             titleCaption = new Label("Title");
             titleCaption.setStyle("-fx-font-weight: bold;");
         }
-        // أضف اللابل قبل العنصر الذي كان يعرض العنوان
         if (titleBtn.getParent() instanceof VBox vb) {
             int idx = vb.getChildren().indexOf(titleBtn);
             if (idx >= 0 && !vb.getChildren().contains(titleCaption)) {
@@ -139,7 +162,6 @@ public class TaskDetailsController {
         }
         datePicker.setValue(currentTask.getDueDate());
         replaceNode(dateLbl, datePicker);
-        // قللي المارجن حتى ما ينضغط لابل "Due Date"
         if (datePicker.getParent() instanceof HBox hb) {
             HBox.setMargin(datePicker, new Insets(10, 0, 0, 10));
             ensureHeadingLabelVisible(hb, "Due Date");
@@ -211,8 +233,43 @@ public class TaskDetailsController {
         currentTask.setDueDate(date);
         currentTask.setPriority(priority);
 
+        // تأكد من userId قبل الحفظ
+        try {
+            if (currentTask.getUserId() == null && currentUser != null && currentUser.getId() != null) {
+                currentTask.setUserId(currentUser.getId());
+            }
+        } catch (Throwable ignored) { }
+
         updatePriorityColor(priority);
         return true;
+    }
+
+    // حفظ التعديلات في DB مع رسائل
+    private boolean persistUpdate() {
+        if (currentTask.getId() == null || currentTask.getUserId() == null) {
+            alert("Save Task", "Missing task id or user id.");
+            return false;
+        }
+        try {
+            tasksRepo.update(currentTask);
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            alert("Save Task", "Failed to save: " + ex.getMessage());
+            return false;
+        }
+    }
+
+    // حفظ صامت عند تبديل حالة الإكمال
+    private void persistUpdateSilently() {
+        try {
+            if (currentTask != null && currentTask.getId() != null) {
+                if (currentTask.getUserId() == null && currentUser != null) {
+                    currentTask.setUserId(currentUser.getId());
+                }
+                if (currentTask.getUserId() != null) tasksRepo.update(currentTask);
+            }
+        } catch (Exception ignored) { }
     }
 
     // تلوين الدائرة
@@ -257,13 +314,12 @@ public class TaskDetailsController {
         for (javafx.scene.Node n : hb.getChildren()) {
             if (n instanceof Label l) {
                 String txt = l.getText() == null ? "" : l.getText().trim();
-                // لو هو لابل "Due Date" أو "Priority" خلِّيه بعرضه الطبيعي
                 if (txt.toLowerCase().startsWith(expectedText.toLowerCase().substring(0, 3))) {
                     l.setWrapText(false);
                     l.setMinWidth(Region.USE_PREF_SIZE);
                     l.setPrefWidth(Region.USE_COMPUTED_SIZE);
                     l.setMaxWidth(Region.USE_COMPUTED_SIZE);
-                    l.setText(expectedText); // يصحح أي أحرف غير مرئية/مكسورة
+                    l.setText(expectedText);
                 }
             }
         }

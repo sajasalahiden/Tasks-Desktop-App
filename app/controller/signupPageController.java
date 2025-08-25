@@ -1,6 +1,10 @@
 package app.controller;
 
+import app.config.ServiceLocator;
 import app.model.User;
+import app.repo.UserRepository;
+import app.security.Hashing;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -20,13 +24,14 @@ public class signupPageController implements Initializable {
     @FXML private TextField emailField2;
     @FXML private TextField passFeild;
 
-    // هذا يستدعى تلقائياً عند تحميل الواجهة إذا أردت إعدادات إضافية
+    // مستودع المستخدمين من الـ ServiceLocator
+    private final UserRepository users = ServiceLocator.users();
 
     @FXML
     private void handleSignup(javafx.event.ActionEvent event) {
-        String fullName = nameField.getText().trim();
-        String email = emailField2.getText().trim();
-        String password = passFeild.getText().trim();
+        String fullName = safeTrim(nameField.getText());
+        String email    = safeTrim(emailField2.getText());
+        String password = safeTrim(passFeild.getText());
 
         StringBuilder errors = new StringBuilder();
 
@@ -50,9 +55,14 @@ public class signupPageController implements Initializable {
             errors.append("- Password must be at least 7 characters long.\n");
         }
 
-        // التحقق من أن الإيميل غير مسجل مسبقاً
-        if (UserStorage.getUserByEmail(email) != null) {
-            errors.append("- Email already registered.\n");
+        try {
+            // التحقق من أن الإيميل غير مسجل مسبقاً (عن طريق قاعدة البيانات)
+            if (users.findByEmail(email).isPresent()) {
+                errors.append("- Email already registered.\n");
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Failed to check email: " + e.getMessage());
+            return;
         }
 
         // إذا كان هناك أخطاء، نعرضها كلها مرة واحدة
@@ -61,15 +71,23 @@ public class signupPageController implements Initializable {
             return;
         }
 
-        // إذا لم تكن هناك أخطاء: تسجيل المستخدم
-        User newUser = new User(null, fullName, password, email);
-        UserStorage.addUser(newUser);
+        // تسجيل المستخدم في قاعدة البيانات
+        try {
+            User newUser = new User();
+            newUser.setFullName(fullName);
+            newUser.setEmail(email);
+            // نخزن الهاش، وليس النص الخام
+            newUser.setPassword(Hashing.sha256(password)); // في نسخة الـ User المُحدّثة هذا يمرر للـ passwordHash
 
-        showAlert(Alert.AlertType.INFORMATION, "Account created successfully!");
-        goToLoginPage(event);
+            users.save(newUser);
+
+            showAlert(Alert.AlertType.INFORMATION, "Account created successfully!");
+            goToLoginPage(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Failed to create account: " + e.getMessage());
+        }
     }
-
-
 
     @FXML
     private void handleLogin(javafx.event.ActionEvent event) {
@@ -88,6 +106,8 @@ public class signupPageController implements Initializable {
         }
     }
 
+    private static String safeTrim(String s) { return s == null ? "" : s.trim(); }
+
     private void showAlert(Alert.AlertType type, String message) {
         Alert alert = new Alert(type);
         alert.setTitle("Sign Up");
@@ -98,6 +118,6 @@ public class signupPageController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
+        // لا شيء الآن
     }
 }

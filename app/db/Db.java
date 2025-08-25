@@ -4,6 +4,7 @@ package app.db;
 import java.sql.*;
 
 public final class Db {
+
     // رابط JDBC على XAMPP (localhost:3306)
     private static final String URL =
             "jdbc:mysql://localhost:3306/tasksdb"
@@ -48,4 +49,6 @@ public final class Db {
             throw new RuntimeException("DB init failed", e);
         }
     }
+
+
 }

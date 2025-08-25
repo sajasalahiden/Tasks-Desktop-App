@@ -1,8 +1,10 @@
 package app.controller;
 
 import app.model.Task;
-import app.model.TaskStorage;
 import app.model.User;
+
+import app.config.ServiceLocator;
+import app.repo.TaskRepository;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,6 +27,9 @@ public class mytaskPageController {
     @FXML private Button addBtn;
 
     private User currentUser;
+
+    // مستودع المهام من ServiceLocator (بديل TaskStorage)
+    private final TaskRepository tasksRepo = ServiceLocator.tasks();
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
@@ -57,20 +62,25 @@ public class mytaskPageController {
     }
 
     private void initializeTasks() {
-        if (currentUser == null) {
-            System.out.println("⚠️ initializeTasks: currentUser == null");
+        if (currentUser == null || currentUser.getId() == null) {
+            System.out.println("⚠️ initializeTasks: currentUser == null أو لا يملك id");
             showNoTasksMessage("Please log in to see your tasks");
             return;
         }
 
-        List<Task> userTasks = TaskStorage.getTasksForUser(currentUser);
+        try {
+            List<Task> userTasks = tasksRepo.listByUser(currentUser.getId());
 
-        if (userTasks == null || userTasks.isEmpty()) {
-            showNoTasksMessage("No Tasks Yet");
-            return;
+            if (userTasks == null || userTasks.isEmpty()) {
+                showNoTasksMessage("No Tasks Yet");
+                return;
+            }
+
+            showTasks(userTasks);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showNoTasksMessage("Failed to load tasks");
         }
-
-        showTasks(userTasks);
     }
 
     private void showNoTasksMessage(String text) {
@@ -95,10 +105,8 @@ public class mytaskPageController {
                     cardController.setTask(task);
                 }
 
-                // ✅ اجعل البطاقة قابلة للنقر وتفتح صفحة التفاصيل
+                // افتح التفاصيل عند النقر
                 taskCard.setOnMouseClicked(e -> openTaskDetails(task));
-
-                // (اختياري) شكل اليد عند المرور
                 taskCard.setStyle(taskCard.getStyle() + "; -fx-cursor: hand;");
 
                 tasksContainer.getChildren().add(taskCard);
@@ -108,10 +116,9 @@ public class mytaskPageController {
         }
     }
 
-    // ✅ يفتح صفحة تفاصيل المهمة ويمرّر user + task
+    // يفتح صفحة تفاصيل المهمة ويمرّر user + task
     private void openTaskDetails(Task task) {
         try {
-            // لو اسم ملف التفاصيل مختلف عندك (مثلاً viewCardPage.fxml) عدّلي السطر التالي:
             FXMLLoader fx = new FXMLLoader(getClass().getResource("/app/view/viewCardPage.fxml"));
             Parent root = fx.load();
 

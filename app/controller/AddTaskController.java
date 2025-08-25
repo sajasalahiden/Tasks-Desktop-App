@@ -2,8 +2,11 @@ package app.controller;
 
 import app.model.Priority;
 import app.model.Task;
-import app.model.TaskStorage;
 import app.model.User;
+
+import app.config.ServiceLocator;
+import app.repo.TaskRepository;
+
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -38,11 +41,12 @@ public class AddTaskController implements Initializable {
 
     private User currentUser;
 
+    // البديل عن TaskStorage
+    private final TaskRepository tasksRepo = ServiceLocator.tasks();
+
     public void setCurrentUser(User user) {
         this.currentUser = user;
     }
-
-
 
     @FXML
     void saveAction(ActionEvent event) {
@@ -55,14 +59,25 @@ public class AddTaskController implements Initializable {
             showAlert("Please fill in all required fields.");
             return;
         }
+        if (currentUser == null || currentUser.getId() == null) {
+            showAlert("No active user. Please log in again.");
+            return;
+        }
 
-        Task task = new Task(title, description, dueDate, priority);
-        task.setUser(currentUser); // ✔️ صحيح
-
-        TaskStorage.addTask(task);
-
-        // Navigate to My Tasks page
         try {
+            Task task = new Task(title, description, dueDate, priority);
+            task.setUser(currentUser); // يملأ user للـ UI
+            // تأكيد userId للحفظ في DB
+            try {
+                if (task.getUserId() == null && currentUser.getId() != null) {
+                    task.setUserId(currentUser.getId());
+                }
+            } catch (Throwable ignored) { /* لو كانت setUserId غير موجودة في نسختك */ }
+
+            // حفظ في قاعدة البيانات
+            tasksRepo.save(task);
+
+            // الرجوع لصفحة المهام
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/app/view/mytaskPage.fxml"));
             Parent root = loader.load();
 
@@ -73,15 +88,16 @@ public class AddTaskController implements Initializable {
             stage.setScene(new Scene(root));
             stage.show();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Failed to load My Tasks page.");
+            showAlert("Failed to save task: " + e.getMessage());
         }
     }
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Validation Error");
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
@@ -89,6 +105,5 @@ public class AddTaskController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         priorityField.setItems(FXCollections.observableArrayList(Priority.values()));
-
     }
 }

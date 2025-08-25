@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.Node;
 import javafx.stage.Stage;
@@ -22,16 +23,20 @@ public class helloPageController {
     // يُستدعى من شاشة تسجيل الدخول
     public void setCurrentUser(User user) {
         this.currentUser = user;
-        if (user != null) {
+        if (user != null && nameinputField != null) {
             nameinputField.setText(user.getFullName());
         } else {
-            System.out.println("⚠️ helloPageController.setCurrentUser: user == null");
+            System.out.println("⚠️ helloPageController.setCurrentUser: user == null أو label غير محقون بعد");
         }
     }
 
     // زر Start: ينقلك مباشرة إلى صفحة المهام
     @FXML
     private void startaction(ActionEvent event) {
+        if (currentUser == null) {
+            showAlert("No active user. Please log in again.");
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/app/view/mytaskPage.fxml"));
             Parent root = loader.load();
@@ -39,12 +44,21 @@ public class helloPageController {
             mytaskPageController controller = loader.getController();
             controller.setCurrentUser(currentUser); // مرري المستخدم
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow(); // آمن لأنه جاي من زر
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
+            showAlert("Failed to open tasks page: " + e.getMessage());
         }
+    }
+
+    private void showAlert(String msg) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle("Navigation");
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 }

@@ -1,6 +1,9 @@
 package app.controller;
 
+import app.config.ServiceLocator;
 import app.model.User;
+import app.repo.UserRepository;
+import app.security.Hashing;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,36 +20,54 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Optional;
 
 public class loginPageController implements Initializable {
 
     @FXML private TextField emailField;
-    @FXML private TextField passFeild; // تأكد أن fx:id في FXML هو نفسه "passFeild"
+    @FXML private TextField passFeild; // تأكد أن fx:id في الـ FXML مكتوب بالتهجئة نفسها
 
-    // عند النقر على زر "Login"
+    private final UserRepository users = ServiceLocator.users();
+
     @FXML
     private void handleLogin(ActionEvent event) {
-        String email = emailField.getText() == null ? "" : emailField.getText().trim();
-        String password = passFeild.getText() == null ? "" : passFeild.getText().trim();
+        String email = safeTrim(emailField.getText());
+        String password = safeTrim(passFeild.getText());
 
-        // تحقق من عدم ترك الحقول فارغة
         if (email.isEmpty() || password.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Please fill in both fields.");
             return;
         }
 
-        // تحقق من صحة البيانات عبر UserStorage
-        User user = app.controller.UserStorage.getUserByEmailAndPassword(email, password);
+        try {
+            Optional<User> uOpt = users.findByEmail(email);
+            if (uOpt.isEmpty()) {
+                showAlert(Alert.AlertType.ERROR, "User not found.");
+                return;
+            }
 
-        if (user != null) {
-            // ✅ إذا كانت البيانات صحيحة، انتقل إلى helloPage ومرّر المستخدم
-            goToHelloPage(event, user);
-        } else {
-            showAlert(Alert.AlertType.ERROR, "Incorrect email or password.");
+            User u = uOpt.get();
+
+            // قارن الهاش مع المخزّن في DB
+            String givenHash = Hashing.sha256(password);
+
+            // ملاحظة: User.getPassword() عندنا يرجّع الـ hash (توافقًا مع الكود القديم)
+            String storedHash = u.getPassword() != null ? u.getPassword() : u.getPasswordHash();
+
+            if (storedHash == null || !storedHash.equals(givenHash)) {
+                showAlert(Alert.AlertType.ERROR, "Incorrect email or password.");
+                return;
+            }
+
+            // ✅ نجاح: انتقل لصفحة الترحيب ومرّر المستخدم
+            goToHelloPage(event, u);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Login failed: " + ex.getMessage());
         }
     }
 
-    // الانتقال إلى صفحة إنشاء حساب
     @FXML
     private void goToSignupPage(ActionEvent event) {
         try {
@@ -60,13 +81,11 @@ public class loginPageController implements Initializable {
         }
     }
 
-    // الانتقال إلى صفحة الترحيب HelloPage مع تمرير المستخدم لها
     private void goToHelloPage(ActionEvent event, User user) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/app/view/helloPage.fxml"));
             Parent root = loader.load();
 
-            // ✅ إرسال المستخدم لصفحة helloPage
             helloPageController controller = loader.getController();
             controller.setCurrentUser(user);
 
@@ -80,7 +99,8 @@ public class loginPageController implements Initializable {
         }
     }
 
-    // عرض رسالة تنبيه (خطأ أو نجاح)
+    private static String safeTrim(String s) { return s == null ? "" : s.trim(); }
+
     private void showAlert(Alert.AlertType type, String message) {
         Alert alert = new Alert(type);
         alert.setTitle("Login");
@@ -91,6 +111,6 @@ public class loginPageController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // لا حاجة لشيء الآن
+        // لا شيء الآن
     }
 }
