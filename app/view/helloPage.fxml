@@ -37,6 +37,9 @@
          <font>
             <Font name="System Bold Italic" size="14.0" />
          </font>
+         <VBox.margin>
+            <Insets right="50.0" />
+         </VBox.margin>
       </Button>
    </children>
 </VBox>

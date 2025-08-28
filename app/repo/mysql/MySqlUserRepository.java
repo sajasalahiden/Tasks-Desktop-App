@@ -1,9 +1,9 @@
-// app/repo/mysql/MySqlUserRepository.java
 package app.repo.mysql;
 
 import app.db.Db;
 import app.model.User;
 import app.repo.UserRepository;
+
 import java.sql.*;
 import java.util.*;
 
@@ -13,7 +13,7 @@ public class MySqlUserRepository implements UserRepository {
         u.setId(rs.getLong("id"));
         u.setFullName(rs.getString("full_name"));
         u.setEmail(rs.getString("email"));
-        u.setPasswordHash(rs.getString("password_hash")); // أو setPasswordHash لو اسمك هيك
+        u.setPasswordHash(rs.getString("password_hash"));
         return u;
     }
 
@@ -54,7 +54,7 @@ public class MySqlUserRepository implements UserRepository {
         try (var c = Db.get(); var ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, u.getFullName());
             ps.setString(2, u.getEmail());
-            ps.setString(3, u.getPasswordHash()); // مرر الهاش هنا
+            ps.setString(3, u.getPasswordHash());
             ps.executeUpdate();
             try (var k = ps.getGeneratedKeys()) {
                 if (k.next()) return k.getLong(1);
@@ -69,7 +69,7 @@ public class MySqlUserRepository implements UserRepository {
         try (var c = Db.get(); var ps = c.prepareStatement(sql)) {
             ps.setString(1, u.getFullName());
             ps.setString(2, u.getEmail());
-            ps.setString(3, u.getPasswordHash()); // مرر الهاش
+            ps.setString(3, u.getPasswordHash());
             ps.setLong(4, u.getId());
             ps.executeUpdate();
         }

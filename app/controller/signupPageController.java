@@ -20,43 +20,40 @@ import java.util.ResourceBundle;
 
 public class signupPageController implements Initializable {
 
-    @FXML private TextField nameField;
-    @FXML private TextField emailField2;
-    @FXML private TextField passFeild;
+    @FXML
+    private TextField nameField;
+    @FXML
+    private TextField emailField2;
+    @FXML
+    private TextField passFeild;
 
-    // مستودع المستخدمين من الـ ServiceLocator
     private final UserRepository users = ServiceLocator.users();
 
     @FXML
     private void handleSignup(javafx.event.ActionEvent event) {
         String fullName = safeTrim(nameField.getText());
-        String email    = safeTrim(emailField2.getText());
+        String email = safeTrim(emailField2.getText());
         String password = safeTrim(passFeild.getText());
 
         StringBuilder errors = new StringBuilder();
 
-        // التحقق من الحقول الفارغة
         if (fullName.isEmpty() || email.isEmpty() || password.isEmpty()) {
             errors.append("- Please fill in all fields.\n");
         }
 
-        // التحقق من الاسم: يحتوي على حروف
         if (!fullName.matches(".*[a-zA-Zأ-ي].*")) {
             errors.append("- Name must contain letters.\n");
         }
 
-        // التحقق من صيغة الإيميل
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
             errors.append("- Invalid email format.\n");
         }
 
-        // التحقق من طول الباسورد
         if (password.length() < 7) {
             errors.append("- Password must be at least 7 characters long.\n");
         }
 
         try {
-            // التحقق من أن الإيميل غير مسجل مسبقاً (عن طريق قاعدة البيانات)
             if (users.findByEmail(email).isPresent()) {
                 errors.append("- Email already registered.\n");
             }
@@ -65,19 +62,16 @@ public class signupPageController implements Initializable {
             return;
         }
 
-        // إذا كان هناك أخطاء، نعرضها كلها مرة واحدة
         if (errors.length() > 0) {
             showAlert(Alert.AlertType.ERROR, errors.toString());
             return;
         }
 
-        // تسجيل المستخدم في قاعدة البيانات
         try {
             User newUser = new User();
             newUser.setFullName(fullName);
             newUser.setEmail(email);
-            // نخزن الهاش، وليس النص الخام
-            newUser.setPassword(Hashing.sha256(password)); // في نسخة الـ User المُحدّثة هذا يمرر للـ passwordHash
+            newUser.setPasswordHash(Hashing.sha256(password));
 
             users.save(newUser);
 
@@ -106,7 +100,9 @@ public class signupPageController implements Initializable {
         }
     }
 
-    private static String safeTrim(String s) { return s == null ? "" : s.trim(); }
+    private static String safeTrim(String s) {
+        return s == null ? "" : s.trim();
+    }
 
     private void showAlert(Alert.AlertType type, String message) {
         Alert alert = new Alert(type);
@@ -118,6 +114,5 @@ public class signupPageController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // لا شيء الآن
     }
 }

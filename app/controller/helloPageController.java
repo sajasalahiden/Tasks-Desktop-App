@@ -20,17 +20,15 @@ public class helloPageController {
 
     private User currentUser;
 
-    // يُستدعى من شاشة تسجيل الدخول
     public void setCurrentUser(User user) {
         this.currentUser = user;
         if (user != null && nameinputField != null) {
             nameinputField.setText(user.getFullName());
         } else {
-            System.out.println("⚠️ helloPageController.setCurrentUser: user == null أو label غير محقون بعد");
+            System.out.println(" Erroe when getting current user");
         }
     }
 
-    // زر Start: ينقلك مباشرة إلى صفحة المهام
     @FXML
     private void startaction(ActionEvent event) {
         if (currentUser == null) {
@@ -42,7 +40,7 @@ public class helloPageController {
             Parent root = loader.load();
 
             mytaskPageController controller = loader.getController();
-            controller.setCurrentUser(currentUser); // مرري المستخدم
+            controller.setCurrentUser(currentUser);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));

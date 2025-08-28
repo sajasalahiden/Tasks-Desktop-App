@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.Scene;
 import javafx.scene.Node;
@@ -24,8 +25,10 @@ import java.util.Optional;
 
 public class loginPageController implements Initializable {
 
-    @FXML private TextField emailField;
-    @FXML private TextField passFeild; // تأكد أن fx:id في الـ FXML مكتوب بالتهجئة نفسها
+    @FXML
+    private TextField emailField;
+    @FXML
+    private PasswordField passFeild;
 
     private final UserRepository users = ServiceLocator.users();
 
@@ -48,18 +51,15 @@ public class loginPageController implements Initializable {
 
             User u = uOpt.get();
 
-            // قارن الهاش مع المخزّن في DB
             String givenHash = Hashing.sha256(password);
 
-            // ملاحظة: User.getPassword() عندنا يرجّع الـ hash (توافقًا مع الكود القديم)
-            String storedHash = u.getPassword() != null ? u.getPassword() : u.getPasswordHash();
+            String storedHash = u.getPasswordHash();
 
             if (storedHash == null || !storedHash.equals(givenHash)) {
                 showAlert(Alert.AlertType.ERROR, "Incorrect email or password.");
                 return;
             }
 
-            // ✅ نجاح: انتقل لصفحة الترحيب ومرّر المستخدم
             goToHelloPage(event, u);
 
         } catch (Exception ex) {
@@ -99,7 +99,9 @@ public class loginPageController implements Initializable {
         }
     }
 
-    private static String safeTrim(String s) { return s == null ? "" : s.trim(); }
+    private static String safeTrim(String s) {
+        return s == null ? "" : s.trim();
+    }
 
     private void showAlert(Alert.AlertType type, String message) {
         Alert alert = new Alert(type);
@@ -111,6 +113,5 @@ public class loginPageController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // لا شيء الآن
     }
 }

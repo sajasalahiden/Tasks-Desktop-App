@@ -22,23 +22,21 @@ import java.util.List;
 
 public class mytaskPageController {
 
-    @FXML private VBox tasksContainer;
-    @FXML private Label noTasksFeild;
-    @FXML private Button addBtn;
+    @FXML
+    private VBox tasksContainer;
+    @FXML
+    private Label noTasksFeild;
 
     private User currentUser;
 
-    // مستودع المهام من ServiceLocator (بديل TaskStorage)
     private final TaskRepository tasksRepo = ServiceLocator.tasks();
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
 
         if (user != null) {
-            System.out.println("✅ currentUser وُصل إلى mytaskPageController: " + user);
             initializeTasks();
         } else {
-            System.out.println("⚠️ mytaskPageController.setCurrentUser: user == null");
             tasksContainer.getChildren().clear();
             showNoTasksMessage("Please log in to see your tasks");
         }
@@ -63,7 +61,6 @@ public class mytaskPageController {
 
     private void initializeTasks() {
         if (currentUser == null || currentUser.getId() == null) {
-            System.out.println("⚠️ initializeTasks: currentUser == null أو لا يملك id");
             showNoTasksMessage("Please log in to see your tasks");
             return;
         }
@@ -105,7 +102,6 @@ public class mytaskPageController {
                     cardController.setTask(task);
                 }
 
-                // افتح التفاصيل عند النقر
                 taskCard.setOnMouseClicked(e -> openTaskDetails(task));
                 taskCard.setStyle(taskCard.getStyle() + "; -fx-cursor: hand;");
 
@@ -116,7 +112,6 @@ public class mytaskPageController {
         }
     }
 
-    // يفتح صفحة تفاصيل المهمة ويمرّر user + task
     private void openTaskDetails(Task task) {
         try {
             FXMLLoader fx = new FXMLLoader(getClass().getResource("/app/view/viewCardPage.fxml"));

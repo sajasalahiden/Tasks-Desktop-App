@@ -9,8 +9,14 @@ public final class ServiceLocator {
     private static final UserRepository USERS = new MySqlUserRepository();
     private static final TaskRepository TASKS = new MySqlTaskRepository();
 
-    public static UserRepository users() { return USERS; }
-    public static TaskRepository tasks() { return TASKS; }
+    public static UserRepository users() {
+        return USERS;
+    }
 
-    private ServiceLocator() {} // منع
+    public static TaskRepository tasks() {
+        return TASKS;
+    }
+
+    private ServiceLocator() {
+    }
 }

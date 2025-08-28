@@ -26,31 +26,32 @@ import java.time.LocalDate;
 
 public class TaskDetailsController {
 
-    // ====== من الـFXML ======
-    @FXML private VBox root;       // اربطي fx:id="root" على الـVBox الأعلى (اختياري)
-    @FXML private Label titleBtn;  // يعرض عنوان المهمة في وضع القراءة
-    @FXML private Label desLbl;
-    @FXML private Label dateLbl;   // هذا لابل التاريخ (القيمة) في وضع القراءة، سنستبدله بـ DatePicker
-    @FXML private Label PriorityLbl; // هذا لابل الأولوية (القيمة) في وضع القراءة، سنستبدله بـ ComboBox
-    @FXML private Circle colorCircle;
-    @FXML private CheckBox completeMark;
-    @FXML private Button backBtn, deleteBtn, editBtn;
+    @FXML
+    private Label titleBtn;
+    @FXML
+    private Label desLbl;
+    @FXML
+    private Label dateLbl;
+    @FXML
+    private Label PriorityLbl;
+    @FXML
+    private Circle colorCircle;
+    @FXML
+    private CheckBox completeMark;
+    @FXML
+    private Button backBtn, deleteBtn, editBtn;
 
-    // ====== عناصر التحرير ======
     private TextField titleField;
-    private TextArea  descArea;
+    private TextArea descArea;
     private DatePicker datePicker;
     private ComboBox<Priority> priorityBox;
 
-    // لابل “Title” الذي نضيفه ديناميكيًا فوق الحقل أثناء التعديل
     private Label titleCaption;
 
-    // ====== سياق ======
     private User currentUser;
     private Task currentTask;
     private boolean editing = false;
 
-    // مستودع المهام (بديل TaskStorage)
     private final TaskRepository tasksRepo = ServiceLocator.tasks();
 
     public void setContext(User user, Task task) {
@@ -60,7 +61,6 @@ public class TaskDetailsController {
 
         if (currentTask != null) {
             completeMark.setSelected(currentTask.isCompleted());
-            // عند تغيير الحالة احفظ فورًا في DB
             completeMark.selectedProperty().addListener((obs, o, v) -> {
                 currentTask.setCompleted(v);
                 persistUpdateSilently();
@@ -68,15 +68,13 @@ public class TaskDetailsController {
         }
     }
 
-    public void setCurrentUser(User user) { this.currentUser = user; }
-    public void setTask(Task task) { this.currentTask = task; if (task != null) fillLabelsFromTask(task); }
-
-    // ====== أزرار ======
     @FXML
-    private void onBack(ActionEvent e) { goToMyTasks(); }
+    private void onBack() {
+        goToMyTasks();
+    }
 
     @FXML
-    private void onDelete(ActionEvent e) {
+    private void onDelete() {
         if (currentUser == null || currentUser.getId() == null || currentTask == null || currentTask.getId() == null) {
             alert("Delete Task", "Missing user or task id.");
             return;
@@ -95,14 +93,12 @@ public class TaskDetailsController {
         if (!editing) {
             enterEditMode();
         } else if (applyEditsToTask()) {
-            // احفظ في DB ثم ارجعي لوضع العرض
             if (!persistUpdate()) return;
             exitEditMode();
             fillLabelsFromTask(currentTask);
         }
     }
 
-    // ====== عرض/تحرير ======
     private void fillLabelsFromTask(Task t) {
         titleBtn.setText(safe(t.getTitle(), "Task Details"));
         desLbl.setText(safe(t.getDescription(), ""));
@@ -118,7 +114,6 @@ public class TaskDetailsController {
         editing = true;
         editBtn.setText("Save");
 
-        // ---- Title label (caption) أعلى الحقل ----
         if (titleCaption == null) {
             titleCaption = new Label("Title");
             titleCaption.setStyle("-fx-font-weight: bold;");
@@ -131,7 +126,6 @@ public class TaskDetailsController {
             }
         }
 
-        // ---- Title field ----
         if (titleField == null) {
             titleField = new TextField();
             titleField.setPromptText("Title");
@@ -142,7 +136,6 @@ public class TaskDetailsController {
         if (titleField.getParent() instanceof VBox)
             VBox.setMargin(titleField, new Insets(0, 10, 0, 20));
 
-        // ---- Description ----
         if (descArea == null) {
             descArea = new TextArea();
             descArea.setPrefRowCount(3);
@@ -154,7 +147,6 @@ public class TaskDetailsController {
         if (descArea.getParent() instanceof VBox)
             VBox.setMargin(descArea, new Insets(0, 10, 0, 20));
 
-        // ---- Due Date ----
         if (datePicker == null) {
             datePicker = new DatePicker();
             datePicker.setPrefWidth(200);
@@ -173,14 +165,24 @@ public class TaskDetailsController {
             priorityBox.getItems().setAll(Priority.values());
             priorityBox.setPrefWidth(160);
             priorityBox.setConverter(new StringConverter<>() {
-                @Override public String toString(Priority p) {
+                @Override
+                public String toString(Priority p) {
                     if (p == null) return "";
-                    return switch (p) { case HIGH -> "High"; case MEDIUM -> "Medium"; case LOW -> "Low"; };
+                    return switch (p) {
+                        case HIGH -> "High";
+                        case MEDIUM -> "Medium";
+                        case LOW -> "Low";
+                    };
                 }
-                @Override public Priority fromString(String s) {
+
+                @Override
+                public Priority fromString(String s) {
                     if (s == null) return null;
                     return switch (s.trim().toLowerCase()) {
-                        case "high" -> Priority.HIGH; case "medium" -> Priority.MEDIUM; case "low" -> Priority.LOW; default -> null;
+                        case "high" -> Priority.HIGH;
+                        case "medium" -> Priority.MEDIUM;
+                        case "low" -> Priority.LOW;
+                        default -> null;
                     };
                 }
             });
@@ -197,12 +199,10 @@ public class TaskDetailsController {
         editing = false;
         editBtn.setText("Edit Task");
 
-        // أزيل لابل العنوان (caption)
         if (titleCaption != null && titleCaption.getParent() instanceof VBox vb) {
             vb.getChildren().remove(titleCaption);
         }
 
-        // ارجعي العناصر للعرض
         titleBtn.setText(safe(currentTask.getTitle(), "Task Details"));
         replaceNode(titleField, titleBtn);
 
@@ -221,7 +221,10 @@ public class TaskDetailsController {
         if (currentTask == null) return false;
 
         String title = (titleField != null && titleField.getText() != null) ? titleField.getText().trim() : "";
-        if (title.isEmpty()) { alert("Validation", "Title is required."); return false; }
+        if (title.isEmpty()) {
+            alert("Validation", "Title is required.");
+            return false;
+        }
 
         String desc = (descArea != null && descArea.getText() != null) ? descArea.getText().trim() : "";
         LocalDate date = datePicker != null ? datePicker.getValue() : currentTask.getDueDate();
@@ -233,18 +236,17 @@ public class TaskDetailsController {
         currentTask.setDueDate(date);
         currentTask.setPriority(priority);
 
-        // تأكد من userId قبل الحفظ
         try {
             if (currentTask.getUserId() == null && currentUser != null && currentUser.getId() != null) {
                 currentTask.setUserId(currentUser.getId());
             }
-        } catch (Throwable ignored) { }
+        } catch (Throwable ignored) {
+        }
 
         updatePriorityColor(priority);
         return true;
     }
 
-    // حفظ التعديلات في DB مع رسائل
     private boolean persistUpdate() {
         if (currentTask.getId() == null || currentTask.getUserId() == null) {
             alert("Save Task", "Missing task id or user id.");
@@ -260,7 +262,6 @@ public class TaskDetailsController {
         }
     }
 
-    // حفظ صامت عند تبديل حالة الإكمال
     private void persistUpdateSilently() {
         try {
             if (currentTask != null && currentTask.getId() != null) {
@@ -269,21 +270,32 @@ public class TaskDetailsController {
                 }
                 if (currentTask.getUserId() != null) tasksRepo.update(currentTask);
             }
-        } catch (Exception ignored) { }
-    }
-
-    // تلوين الدائرة
-    private void updatePriorityColor(Priority p) {
-        colorCircle.getStyleClass().removeAll("prio-high", "prio-medium", "prio-low");
-        if (p == null) { colorCircle.setStyle("-fx-fill: #D1D5DB;"); return; }
-        switch (p) {
-            case HIGH   -> { colorCircle.setStyle("-fx-fill: #EF4444;"); colorCircle.getStyleClass().add("prio-high"); }
-            case MEDIUM -> { colorCircle.setStyle("-fx-fill: #F59E0B;"); colorCircle.getStyleClass().add("prio-medium"); }
-            case LOW    -> { colorCircle.setStyle("-fx-fill: #22C55E;"); colorCircle.getStyleClass().add("prio-low"); }
+        } catch (Exception ignored) {
         }
     }
 
-    // ====== تنقّل ======
+    private void updatePriorityColor(Priority p) {
+        colorCircle.getStyleClass().removeAll("prio-high", "prio-medium", "prio-low");
+        if (p == null) {
+            colorCircle.setStyle("-fx-fill: #D1D5DB;");
+            return;
+        }
+        switch (p) {
+            case HIGH -> {
+                colorCircle.setStyle("-fx-fill: #EF4444;");
+                colorCircle.getStyleClass().add("prio-high");
+            }
+            case MEDIUM -> {
+                colorCircle.setStyle("-fx-fill: #F59E0B;");
+                colorCircle.getStyleClass().add("prio-medium");
+            }
+            case LOW -> {
+                colorCircle.setStyle("-fx-fill: #22C55E;");
+                colorCircle.getStyleClass().add("prio-low");
+            }
+        }
+    }
+
     private void goToMyTasks() {
         try {
             FXMLLoader fx = new FXMLLoader(getClass().getResource("/app/view/mytaskPage.fxml"));
@@ -293,7 +305,9 @@ public class TaskDetailsController {
             Stage st = (Stage) backBtn.getScene().getWindow();
             st.setScene(new Scene(root));
             st.show();
-        } catch (IOException ex) { ex.printStackTrace(); }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     // ====== أدوات ======
@@ -309,7 +323,6 @@ public class TaskDetailsController {
         newNode.setFocusTraversable(true);
     }
 
-    /** يضمن أن لابل العنوان داخل الـHBox يظهر كاملًا (بدون قص). */
     private void ensureHeadingLabelVisible(HBox hb, String expectedText) {
         for (javafx.scene.Node n : hb.getChildren()) {
             if (n instanceof Label l) {
@@ -325,10 +338,16 @@ public class TaskDetailsController {
         }
     }
 
-    private String safe(String s, String def) { return (s == null || s.isBlank()) ? def : s; }
+    private String safe(String s, String def) {
+        return (s == null || s.isBlank()) ? def : s;
+    }
 
     private String display(Priority p) {
-        return switch (p) { case HIGH -> "High"; case MEDIUM -> "Medium"; case LOW -> "Low"; };
+        return switch (p) {
+            case HIGH -> "High";
+            case MEDIUM -> "Medium";
+            case LOW -> "Low";
+        };
     }
 
     private void alert(String title, String msg) {

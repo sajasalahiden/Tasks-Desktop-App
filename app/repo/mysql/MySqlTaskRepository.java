@@ -18,7 +18,7 @@ public class MySqlTaskRepository implements TaskRepository {
     }
 
     private Task map(ResultSet rs) throws SQLException {
-        Task t = new Task();
+        var t = new Task();
         t.setId(rs.getLong("id"));
         t.setUserId(rs.getLong("user_id"));
         t.setTitle(rs.getString("title"));
@@ -52,7 +52,6 @@ public class MySqlTaskRepository implements TaskRepository {
 
     @Override
     public long save(Task t) throws Exception {
-        // حاول نكمل userId من user إذا موجود
         if (t.getUserId() == null && t.getUser() != null && t.getUser().getId() != null) {
             t.setUserId(t.getUser().getId());
         }
@@ -82,7 +81,7 @@ public class MySqlTaskRepository implements TaskRepository {
             try (ResultSet k = ps.getGeneratedKeys()) {
                 if (k.next()) {
                     long id = k.getLong(1);
-                    t.setId(id);              // ثبّت المعرف داخل الكائن
+                    t.setId(id);
                     return id;
                 }
             }

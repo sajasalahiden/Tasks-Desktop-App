@@ -12,12 +12,17 @@ import java.time.format.DateTimeFormatter;
 
 public class TaskCardController {
 
-    @FXML private Label titleLabel;
-    @FXML private Label descLabel;
-    @FXML private Label dueLabel;
+    @FXML
+    private Label titleLabel;
+    @FXML
+    private Label descLabel;
+    @FXML
+    private Label dueLabel;
 
-    @FXML private Circle statusCircle;  // الدائرة يسار العنوان
-    @FXML private Label checkIcon;      // علامة ✓ داخل الدائرة
+    @FXML
+    private Circle statusCircle;
+    @FXML
+    private Label checkIcon;
 
     private Task task;
 
@@ -27,7 +32,6 @@ public class TaskCardController {
         this.task = task;
         if (task == null) return;
 
-        // نصوص البطاقة
         titleLabel.setText(s(task.getTitle()));
         descLabel.setText(s(task.getDescription()));
 
@@ -37,11 +41,12 @@ public class TaskCardController {
             dueLabel.setText("");
         }
 
-        // مظهر الاكتمال + التلوين حسب الأولوية + وسم التأخير
         renderUI();
     }
 
-    /** Call this بعد تعديل task من شاشة أخرى لتحديث الكارد بدون إعادة تحميل الـ FXML. */
+    /**
+     * Call this بعد تعديل task من شاشة أخرى لتحديث الكارد بدون إعادة تحميل الـ FXML.
+     */
     public void refresh() {
         if (this.task != null) setTask(this.task);
     }
@@ -56,7 +61,6 @@ public class TaskCardController {
         attachTooltip(completed, task.getPriority());
     }
 
-    /** يضبط مظهر الدائرة / الصح حسب حالة الاكتمال. */
     private void renderCompleted(boolean completed) {
         if (statusCircle == null || checkIcon == null) return;
 
@@ -71,37 +75,32 @@ public class TaskCardController {
         }
     }
 
-    /** تلوين حدود الدائرة حسب الأولوية (لا نغيّر النصوص ولا الـ fx:id). */
     private void renderPriority(Priority p) {
         if (statusCircle == null) return;
         String strokeColor;
-        if (p == null) p = Priority.MEDIUM;
 
         switch (p) {
-            case HIGH -> strokeColor = "#e11d48";   // أحمر
-            case MEDIUM -> strokeColor = "#f59e0b"; // برتقالي
-            case LOW -> strokeColor = "#9ca3af";    // رمادي
+            case HIGH -> strokeColor = "#e11d48";
+            case MEDIUM -> strokeColor = "#f59e0b";
+            case LOW -> strokeColor = "#9ca3af";
             default -> strokeColor = "#9ca3af";
         }
 
-        // نحافظ على الـ fill من renderCompleted ونغيّر الـ stroke فقط
         String current = statusCircle.getStyle();
         String base = (current == null ? "" : current.replaceAll("-fx-stroke:\\s*#[0-9a-fA-F]{6};?", ""));
         statusCircle.setStyle(base + " -fx-stroke: " + strokeColor + ";");
     }
 
-    /** يوسم التاريخ لو المهمة متأخرة وغير مكتملة. */
     private void renderOverdueBadge(LocalDate due, boolean completed) {
         if (dueLabel == null) return;
 
         if (!completed && due != null && due.isBefore(LocalDate.now())) {
-            // متأخرة
             dueLabel.setStyle("-fx-text-fill: #dc2626; -fx-font-weight: bold;");
             if (!dueLabel.getText().contains(" (Overdue)")) {
                 dueLabel.setText(dueLabel.getText() + " (Overdue)");
             }
         } else {
-            // عادي
+
             dueLabel.setStyle(null);
             if (due != null) {
                 dueLabel.setText(due.format(DTF));
@@ -113,10 +112,11 @@ public class TaskCardController {
 
     private void attachTooltip(boolean completed, Priority p) {
         if (statusCircle == null) return;
-        if (p == null) p = Priority.MEDIUM;
         String msg = (completed ? "Completed" : "Not completed") + " • Priority: " + p.name();
         Tooltip.install(statusCircle, new Tooltip(msg));
     }
 
-    private static String s(String x) { return x == null ? "" : x; }
+    private static String s(String x) {
+        return x == null ? "" : x;
+    }
 }

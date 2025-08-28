@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 public class Task {
 
-    private Long id;            // BIGINT في DB
-    private Long userId;        // BIGINT في DB
+    private Long id;
+    private Long userId;
 
     private String title;
     private String description;
@@ -13,8 +13,7 @@ public class Task {
     private boolean completed;
     public Priority priority;
 
-    // للاستخدام المؤقت في الواجهة فقط
-    private User user;          // اختياري: اربطيه في UI، لكن الحفظ يتم عبر userId
+    private User user;
 
     public Task() {}
 
@@ -26,7 +25,6 @@ public class Task {
         this.completed = false;
     }
 
-    // ===== Getters / Setters =====
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -51,7 +49,6 @@ public class Task {
     public User getUser() { return user; }
     public void setUser(User user) {
         this.user = user;
-        // مزامنة اختيارية: لو عندك user وفيه id، خليه يملأ userId
         try {
             if (user != null && user.getId() != null) this.userId = user.getId();
         } catch (Throwable ignored) {}

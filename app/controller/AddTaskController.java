@@ -41,7 +41,6 @@ public class AddTaskController implements Initializable {
 
     private User currentUser;
 
-    // البديل عن TaskStorage
     private final TaskRepository tasksRepo = ServiceLocator.tasks();
 
     public void setCurrentUser(User user) {
@@ -66,18 +65,16 @@ public class AddTaskController implements Initializable {
 
         try {
             Task task = new Task(title, description, dueDate, priority);
-            task.setUser(currentUser); // يملأ user للـ UI
-            // تأكيد userId للحفظ في DB
+            task.setUser(currentUser);
             try {
                 if (task.getUserId() == null && currentUser.getId() != null) {
                     task.setUserId(currentUser.getId());
                 }
-            } catch (Throwable ignored) { /* لو كانت setUserId غير موجودة في نسختك */ }
+            } catch (Throwable ignored) {
+            }
 
-            // حفظ في قاعدة البيانات
             tasksRepo.save(task);
 
-            // الرجوع لصفحة المهام
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/app/view/mytaskPage.fxml"));
             Parent root = loader.load();
 

@@ -1,9 +1,8 @@
-// src/app/security/Hashing.java
 package app.security;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-
+//utility classe
 public final class Hashing {
     private Hashing() {}
 
