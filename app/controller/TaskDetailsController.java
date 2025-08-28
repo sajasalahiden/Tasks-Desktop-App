@@ -310,7 +310,6 @@ public class TaskDetailsController {
         }
     }
 
-    // ====== أدوات ======
     private void replaceNode(javafx.scene.Node oldNode, javafx.scene.Node newNode) {
         if (oldNode == null || newNode == null || oldNode.getParent() == null) return;
         if (oldNode.getParent() instanceof VBox parentV) {

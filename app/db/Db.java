@@ -5,18 +5,17 @@ import java.sql.*;
 
 public final class Db {
 
-    // رابط JDBC على XAMPP (localhost:3306)
     private static final String URL =
             "jdbc:mysql://localhost:3306/tasksdb"
                     + "?useSSL=false&allowPublicKeyRetrieval=true"
                     + "&serverTimezone=UTC&useUnicode=true&characterEncoding=utf8";
-    private static final String USER = "root";         // أو "root"
-    private static final String PASS = "";  // أو "" للروت الافتراضي
+    private static final String USER = "root";
+    private static final String PASS = "";
 
     static {
         try { Class.forName("com.mysql.cj.jdbc.Driver"); }
         catch (ClassNotFoundException e) { throw new RuntimeException("MySQL Driver not found", e); }
-        init(); // إنشاء الجداول تلقائيًا إن لم تكن موجودة
+        init();
     }
 
     public static Connection get() throws SQLException {
