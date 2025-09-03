@@ -25,7 +25,7 @@ public class helloPageController {
         if (user != null && nameinputField != null) {
             nameinputField.setText(user.getFullName());
         } else {
-            System.out.println(" Erroe when getting current user");
+            System.out.println("Error when getting current user");
         }
     }
 
@@ -35,12 +35,28 @@ public class helloPageController {
             showAlert("No active user. Please log in again.");
             return;
         }
+        navigateTo(event, "/app/view/mytaskPage.fxml", "Failed to open tasks page");
+    }
+
+    @FXML
+    private void aboutAction(ActionEvent event) {
+        navigateTo(event, "/app/view/aboutPage.fxml", "Failed to open About page");
+    }
+
+    @FXML
+    private void changeAction(ActionEvent event) {
+        navigateTo(event, "/app/view/changepasswordPage.fxml", "Failed to open Change Password page");
+    }
+
+    private void navigateTo(ActionEvent event, String fxmlPath, String errorMessage) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/app/view/mytaskPage.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            mytaskPageController controller = loader.getController();
-            controller.setCurrentUser(currentUser);
+            Object controller = loader.getController();
+            if (controller instanceof RequiresUser) {
+                ((RequiresUser) controller).setCurrentUser(currentUser);
+            }
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -48,7 +64,7 @@ public class helloPageController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Failed to open tasks page: " + e.getMessage());
+            showAlert(errorMessage + ": " + e.getMessage());
         }
     }
 
@@ -58,5 +74,9 @@ public class helloPageController {
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    public interface RequiresUser {
+        void setCurrentUser(User user);
     }
 }

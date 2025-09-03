@@ -21,7 +21,6 @@ public final class Db {
     public static Connection get() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASS);
     }
-
     private static void init() {
         try (Connection c = get(); Statement st = c.createStatement()) {
             st.executeUpdate("""

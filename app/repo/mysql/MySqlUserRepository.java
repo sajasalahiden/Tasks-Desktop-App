@@ -74,4 +74,24 @@ public class MySqlUserRepository implements UserRepository {
             ps.executeUpdate();
         }
     }
+
+    @Override
+    public void updatePasswordById(long userId, String newHash) throws Exception {
+        String sql = "UPDATE users SET password_hash=? WHERE id=?";
+        try (var c = Db.get(); var ps = c.prepareStatement(sql)) {
+            ps.setString(1, newHash);
+            ps.setLong(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public void updatePasswordByEmail(String email, String newHash) throws Exception {
+        String sql = "UPDATE users SET password_hash=? WHERE email=?";
+        try (var c = Db.get(); var ps = c.prepareStatement(sql)) {
+            ps.setString(1, newHash);
+            ps.setString(2, email);
+            ps.executeUpdate();
+        }
+    }
 }

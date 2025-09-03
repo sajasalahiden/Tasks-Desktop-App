@@ -159,7 +159,6 @@ public class TaskDetailsController {
             ensureHeadingLabelVisible(hb, "Due Date");
         }
 
-        // ---- Priority ----
         if (priorityBox == null) {
             priorityBox = new ComboBox<>();
             priorityBox.getItems().setAll(Priority.values());

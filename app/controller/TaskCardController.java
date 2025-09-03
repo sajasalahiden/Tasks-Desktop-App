@@ -44,14 +44,11 @@ public class TaskCardController {
         renderUI();
     }
 
-    /**
-     * Call this بعد تعديل task من شاشة أخرى لتحديث الكارد بدون إعادة تحميل الـ FXML.
-     */
+
     public void refresh() {
         if (this.task != null) setTask(this.task);
     }
 
-    // ===== داخلي =====
 
     private void renderUI() {
         boolean completed = task.isCompleted();

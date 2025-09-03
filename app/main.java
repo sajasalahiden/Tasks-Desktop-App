@@ -3,13 +3,20 @@ package app;
 import app.db.Db;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.*;
 import javafx.stage.Stage;
+
+import java.sql.ResultSet;
 
 
 public class main extends Application {
@@ -43,7 +50,10 @@ public class main extends Application {
 
     public static void main(String[] args) {
         launch(args);
+        Pane pane = new Pane();
+        Node node = pane.getChildren().get(0);
 
-        }
+
+    }
 
 }

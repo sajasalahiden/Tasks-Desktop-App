@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:controller="app.controller.aboutPageController" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="587.0" prefWidth="416.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label text="About:">
+         <font>
+            <Font name="Californian FB Bold" size="24.0" />
+         </font>
+      </Label>
+      <Label alignment="TOP_RIGHT" prefHeight="413.0" prefWidth="416.0" text="What is the application?A simple and effective platform for managing daily tasks that helps you plan, execute, and follow up without distraction. It offers a clear user experience with stable performance built on a scalable structure.Why did we create it?Because paper lists vanish, and phone tasks get lost among notifications. We wanted one organized tool: add a task, set its priority and deadline, then get back to achieving it.Our app is designed to be your daily companion for organizing tasks and keeping track of your work with ease.It gives you a clear way to add tasks, set priorities, and assign due dates.A simple interface helps you stay focused and get important things done without distractions.Its goal is to turn chaos into an organized plan that boosts your productivity and peace of mind." wrapText="true">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding></Label>
+      <Button fx:id="baxkBtn" focusTraversable="false" mnemonicParsing="false" onAction="#backAction" style="-fx-background-color: #ffffff; -fx-background-radius: 15; -fx-border-color: #eeeeee;" text="back">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Button>
+   </children>
+</VBox>

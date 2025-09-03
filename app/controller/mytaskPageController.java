@@ -2,14 +2,12 @@ package app.controller;
 
 import app.model.Task;
 import app.model.User;
-
 import app.config.ServiceLocator;
 import app.repo.TaskRepository;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.Parent;
@@ -20,7 +18,7 @@ import javafx.event.ActionEvent;
 import java.io.IOException;
 import java.util.List;
 
-public class mytaskPageController {
+public class mytaskPageController implements helloPageController.RequiresUser {  // ← المهم
 
     @FXML
     private VBox tasksContainer;
@@ -28,10 +26,10 @@ public class mytaskPageController {
     private Label noTasksFeild;
 
     private User currentUser;
-
     private final TaskRepository tasksRepo = ServiceLocator.tasks();
 
-    public void setCurrentUser(User user) {
+    @Override
+    public void setCurrentUser(User user) {   // ← خليها @Override لتتأكد أنه انطلبت من navigateTo
         this.currentUser = user;
 
         if (user != null) {
@@ -49,6 +47,11 @@ public class mytaskPageController {
             Parent root = loader.load();
 
             AddTaskController controller = loader.getController();
+            // تأمين: ما نمرر null بالغلط
+            if (currentUser == null) {
+                showNoTasksMessage("No active user. Please log in again.");
+                return;
+            }
             controller.setCurrentUser(currentUser);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
